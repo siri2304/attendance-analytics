@@ -1,26 +1,60 @@
-# Candidate kit
+# Employee Attendance & Analytics API
 
-Read in this order:
+A FastAPI application for employee management, attendance punch-in and punch-out, manual attendance corrections, and attendance analytics using MongoDB.
 
-1. `PROBLEM_STATEMENT.docx`: what you are asked to do, how it is evaluated.
-2. `openapi.yaml`: the API contract and the business rules (R1 - R10).
-3. `DATA_MODEL.md`: what is stored in MongoDB, with nine sample documents.
-4. `app/main.py`: the starter. Put **all** your code in this one file. It must start with `uvicorn app.main:app --port 8000`.
-5. `REVIEW.md`, `DECISIONS.md`: templates to fill in.
+## Requirements
 
-`sample_data/` holds the nine sample documents as MongoDB Extended JSON; `sample_seed.py` loads them. The grader's dataset is
-much larger and contains cases they do not show.
+- Python 3.10+
+- MongoDB 6.0 or newer
+- Dependencies listed in `requirements.txt`
 
-## Local setup
+## Setup
+
+Install the dependencies:
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env            # set MONGO_URI / MONGO_DB (local docker: docker run -p 27017:27017 mongo:7)
-python sample_seed.py
-uvicorn app.main:app --port 8000 --reload
 ```
-MongoDB **6.0 or newer** is required (the grader uses 7.0). MongoDB Atlas free tier (M0) works.
 
-## Submit
-A public Git repository with `app/main.py`, `requirements.txt`, `REVIEW.md`, `DECISIONS.md` and a short `README.md`.
-No `.env`, no secrets, no Dockerfile.
+Set the following environment variables before running the application:
+
+- `MONGO_URI`: MongoDB connection string
+- `MONGO_DB`: Database name (defaults to `attendance_db`)
+
+For local MongoDB, you can use:
+
+```text
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB=attendance_db
+```
+
+Do not commit credentials, `.env` files, or other secrets to the repository.
+
+## Run
+
+From the repository root:
+
+```bash
+uvicorn app.main:app --port 8000
+```
+
+The API documentation is available at `http://localhost:8000/docs` while the application is running.
+
+## Main Endpoints
+
+- `GET /health` — health check
+- `POST /employees` and `GET /employees` — employee management
+- `POST /attendance/punch-in` and `POST /attendance/punch-out` — attendance recording
+- `GET /attendance` — attendance listing
+- `PATCH /attendance/{emp_code}/{date}` — manual attendance correction
+- `GET /analytics/employees/{emp_code}/monthly` — employee monthly summary
+- `GET /analytics/departments/summary` — department summary
+- `GET /analytics/leaderboard/late` — late-comers leaderboard
+- `GET /analytics/departments/{department}/trend` — daily attendance trend
+- `GET /admin/explain/{endpoint}` — MongoDB query explain output
+
+## Testing
+
+Configure a MongoDB instance, start the application, and test the endpoints using `/docs` or an HTTP client. Verify validation errors, duplicate and concurrent requests, overnight shifts, audit history, analytics calculations, and query execution plans.
+
+The implementation should be validated against `openapi.yaml`, `DATA_MODEL.md`, and the assignment's business rules before submission.
